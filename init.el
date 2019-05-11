@@ -68,6 +68,9 @@
 (global-set-key (kbd "C-x k") 'kill-this-buffer)
 (add-hook 'before-save-hook 'whitespace-cleanup)
 
+(use-package diminish
+  :ensure t)
+
 (use-package smartparens
   :ensure t
   :diminish smartparens-mode
@@ -132,6 +135,7 @@
 (use-package helm
   :ensure t
   :defer 2
+  :diminish helm-mode
   :bind
   ("M-x" . helm-M-x)
   ("C-x C-f" . helm-find-files)
@@ -168,7 +172,7 @@
     ("84d2f9eeb3f82d619ca4bfffe5f157282f4779732f48a5ac1484d94d5ff5b279" default)))
  '(package-selected-packages
    (quote
-    (helm-projectile helm flycheck company avy which-key use-package smartparens smart-mode-line-powerline-theme projectile magit expand-region doom-themes crux))))
+    (diminish helm-projectile helm flycheck company avy which-key use-package smartparens smart-mode-line-powerline-theme projectile magit expand-region doom-themes crux))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

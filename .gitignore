@@ -10,3 +10,4 @@ session.*
 irony/
 /recentf
 /init.el~
+transient/
