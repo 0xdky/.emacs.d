@@ -1,3 +1,10 @@
+;;; package --- Summary - My minimal Emacs init file
+
+;;; Commentary:
+;;; Simple Emacs setup I carry everywhere
+
+;;; Code:
+
 (setq user-full-name "Sandeep Nambiar"
       user-mail-address "sandeep.turing@gmail.com")
 
