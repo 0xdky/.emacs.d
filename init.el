@@ -166,6 +166,28 @@
   :config
   (helm-projectile-on))
 
+(use-package yasnippet
+  :ensure t
+  :config
+  (yas-global-mode 1))
+
+(use-package lsp-mode :commands lsp :ensure t)
+(use-package lsp-ui :commands lsp-ui-mode :ensure t)
+(use-package company-lsp
+  :ensure t
+  :commands company-lsp
+  :config (push 'company-lsp company-backends))
+
+(use-package ccls
+  :ensure t
+  :config
+  (setq ccls-executable "ccls")
+  (setq lsp-prefer-flymake nil)
+  (setq-default flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck c/c++-gcc))
+  :hook ((c-mode c++-mode objc-mode) .
+         (lambda () (require 'ccls) (lsp))))
+
+
 (require 'server)
 (if (not (server-running-p)) (server-start))
 
@@ -179,7 +201,7 @@
     ("84d2f9eeb3f82d619ca4bfffe5f157282f4779732f48a5ac1484d94d5ff5b279" default)))
  '(package-selected-packages
    (quote
-    (diminish helm-projectile helm flycheck company avy which-key use-package smartparens smart-mode-line-powerline-theme projectile magit expand-region doom-themes crux))))
+    (yasnippet ccls company-lsp lsp-ui lsp-mode diminish helm-projectile helm flycheck company avy which-key use-package smartparens smart-mode-line-powerline-theme projectile magit expand-region doom-themes crux))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
