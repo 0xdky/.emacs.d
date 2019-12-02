@@ -1,15 +1,55 @@
-;;; package --- Summary - My minimal Emacs init file
+;;; package --- Minimal Emacs init file
 
 ;;; Commentary:
-;;; Simple Emacs setup I carry everywhere
+;;; Simple Emacs setup for C/C++ development using language server
 
-;;; Code:
+;;; Helper functions
 
-(setq user-full-name "Sandeep Nambiar"
-      user-mail-address "sandeep.turing@gmail.com")
+;; Jump to matching paren
+(defun match-paren (arg)
+  (interactive "p")
+  (cond ((looking-at "\\s\(") (forward-list 1) (backward-char 1))
+	((looking-at "\\s\)") (forward-char 1) (backward-list 1))))
+
+;; Do not store the absolute path for a symlink
+(defun recentf-clear(regx)
+  (interactive "MRegex for cleanup: ")
+  (let ((orig-recentf-exclude recentf-exclude))
+    (setq recentf-exclude (list regx))
+    (recentf-cleanup)
+    (setq recentf-exclude orig-recentf-exclude))
+  ;; Cleanup the file open history
+  (let ((files file-name-history))
+    (setq file-name-history nil)
+    (while files
+      (let ((file (car files)))
+	(setq files (cdr files))
+	(if (not (string-match-p regx file))
+	    (add-to-list 'file-name-history file))))))
+
+(defun vc-registered-readonly()
+  (interactive)
+  (if (vc-registered buffer-file-name)
+      (read-only-mode t)))
+
+;;; Customizations
+
+(defconst *home (expand-file-name (concat "~" init-file-user)))
+(setq user-mail-address (concat (user-login-name) "@atlassian.com"))
+(add-to-list 'load-path (concat *home "/.site-lisp/"))
 
 (setq gc-cons-threshold 50000000)
 (setq large-file-warning-threshold 100000000)
+
+(setq initial-frame-alist '((width . 120) (height . 40)))
+(setq frame-title-format
+      '((:eval (if (buffer-file-name)
+		   (abbreviate-file-name (buffer-file-name))
+		 "%b"))))
+(setq scroll-margin 0
+      scroll-conservatively 100000
+      scroll-preserve-screen-position 1)
+(set-frame-font "Monaco 13" nil t)
 
 (require 'package)
 (setq package-enable-at-startup nil)
@@ -27,65 +67,22 @@
 (menu-bar-mode -1)
 (toggle-scroll-bar -1)
 (tool-bar-mode -1)
-(global-hl-line-mode +1)
 (blink-cursor-mode -1)
 (line-number-mode +1)
-(global-display-line-numbers-mode 1)
 (column-number-mode t)
 (size-indication-mode t)
 (fset 'yes-or-no-p 'y-or-n-p)
 (setq inhibit-startup-screen t)
 
-(use-package doom-themes
-  :ensure t
-  :config
-  (load-theme 'doom-one t)
-  (doom-themes-visual-bell-config))
-
-(use-package smart-mode-line-powerline-theme
-  :ensure t)
-
-(use-package smart-mode-line
-  :ensure t
-  :config
-  (setq sml/theme 'powerline)
-  (add-hook 'after-init-hook 'sml/setup))
-
-(setq frame-title-format
-      '((:eval (if (buffer-file-name)
-       (abbreviate-file-name (buffer-file-name))
-       "%b"))))
-(setq scroll-margin 0
-      scroll-conservatively 100000
-      scroll-preserve-screen-position 1)
-(set-frame-font "Hack 12" nil t)
-
-(setq backup-directory-alist
-      `((".*" . ,temporary-file-directory)))
-(setq auto-save-file-name-transforms
-      `((".*" ,temporary-file-directory t)))
-
+;; Backup and refresh on changes
+(add-to-list 'backup-directory-alist
+	     `("*" . (concat *home "/.backup")))
 (global-auto-revert-mode t)
-(prefer-coding-system 'utf-8)
-(set-default-coding-systems 'utf-8)
-(set-terminal-coding-system 'utf-8)
-(set-keyboard-coding-system 'utf-8)
-(setq-default tab-width 4
-              indent-tabs-mode nil)
-(global-set-key (kbd "C-x k") 'kill-this-buffer)
-(add-hook 'before-save-hook 'whitespace-cleanup)
 
-(use-package diminish
-  :ensure t)
-
-(use-package smartparens
+(use-package cc-mode
   :ensure t
-  :diminish smartparens-mode
-  :config
-  (progn
-    (require 'smartparens-config)
-    (smartparens-global-mode 1)
-    (show-paren-mode t)))
+  :hook ((c-mode c++-mode) . (lambda () (show-paren-mode t)))
+  :bind (("C-%" . match-paren)))
 
 (use-package expand-region
   :ensure t
@@ -97,35 +94,9 @@
   :config
   (which-key-mode +1))
 
-(use-package avy
-  :ensure t
-  :bind
-  ("C-=" . avy-goto-char)
-  :config
-  (setq avy-background t))
-
-(use-package crux
-  :ensure t
-  :bind
-  ("C-k" . crux-smart-kill-line)
-  ("C-c n" . crux-cleanup-buffer-or-region)
-  ("C-c f" . crux-recentf-find-file)
-  ("C-a" . crux-move-beginning-of-line))
-
 (use-package magit
   :ensure t
   :bind (("C-M-g" . magit-status)))
-
-(use-package projectile
-  :ensure t
-  :diminish projectile-mode
-  :bind
-  (("C-c p f" . helm-projectile-find-file)
-   ("C-c p p" . helm-projectile-switch-project)
-   ("C-c p s" . projectile-save-project-buffers))
-  :config
-  (projectile-mode +1)
-  )
 
 (use-package company
   :ensure t
@@ -133,46 +104,64 @@
   :config
   (add-hook 'after-init-hook #'global-company-mode))
 
-(use-package flycheck
+(use-package recentf
   :ensure t
-  :diminish flycheck-mode
   :config
-  (add-hook 'after-init-hook #'global-flycheck-mode))
+  (setq recentf-max-saved-items 15)
+  (add-to-list 'recentf-exclude
+	       (lambda (p) (not (string-match-p "^/Users/" p))))
+  (recentf-mode +1)
+  (recentf-load-list)
+  (global-set-key "\C-xc" 'recentf-clear)
+  (global-set-key "\C-xo" 'recentf-open-files))
 
-(use-package helm
+(use-package crux
+  :preface
+  (require 'recentf)
   :ensure t
-  :defer 2
-  :diminish helm-mode
   :bind
-  ("M-x" . helm-M-x)
-  ("C-x C-f" . helm-find-files)
-  ("M-y" . helm-show-kill-ring)
-  ("C-x b" . helm-mini)
-  :config
-  (require 'helm-config)
-  (helm-mode 1)
-  (setq helm-split-window-inside-p t
-    helm-move-to-line-cycle-in-source t)
-  (setq helm-autoresize-max-height 0)
-  (setq helm-autoresize-min-height 20)
-  (helm-autoresize-mode 1)
-  (define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action) ; rebind tab to run persistent action
-  (define-key helm-map (kbd "C-i") 'helm-execute-persistent-action) ; make TAB work in terminal
-  (define-key helm-map (kbd "C-z")  'helm-select-action) ; list actions using C-z
-  )
+  ("C-k" . crux-smart-kill-line)
+  ("C-c n" . crux-cleanup-buffer-or-region)
+  ("C-c f" . crux-recentf-find-file)
+  ("C-a" . crux-move-beginning-of-line)
+  ([home] . crux-move-beginning-of-line))
 
-(use-package helm-projectile
+(use-package cc-mode
   :ensure t
   :config
-  (helm-projectile-on))
+  (setq-default indent-tabs-mode t))
 
-(use-package yasnippet
+(use-package go-mode
   :ensure t
-  :config
-  (yas-global-mode 1))
+  :defer nil
+  :bind (
+	 ;; If you want to switch existing go-mode bindings to use lsp-mode/gopls instead
+	 ;; uncomment the following lines
+	 ;; ("C-c C-j" . lsp-find-definition)
+	 ;; ("C-c C-d" . lsp-describe-thing-at-point)
+	 )
+  :hook ((go-mode . lsp-deferred)
+	 (before-save . lsp-format-buffer)
+	 (before-save . lsp-organize-imports)))
 
-(use-package lsp-mode :commands lsp :ensure t)
-(use-package lsp-ui :commands lsp-ui-mode :ensure t)
+(use-package lsp-mode
+  :ensure t
+  :commands (lsp lsp-deferred)
+  :bind (
+	 ("C-t" . pop-tag-mark)
+	 ("C-]" . lsp-find-definition)
+	 ("C-r" . lsp-find-references)
+	 )
+  :config
+  (add-hook 'go-mode 'lsp-deferred))
+
+(use-package lsp-ui
+  :commands lsp-ui-mode
+  :config
+  (setq lsp-ui-doc-enable nil
+	lsp-ui-sideline-enable nil)
+  :ensure t)
+
 (use-package company-lsp
   :ensure t
   :commands company-lsp
@@ -181,27 +170,59 @@
 (use-package ccls
   :ensure t
   :config
-  (setq ccls-executable "ccls")
-  (setq lsp-prefer-flymake nil)
-  (setq-default flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck c/c++-gcc))
+  (setq ccls-executable "ccls"
+	lsp-prefer-flymake nil
+	lsp-enable-snippet nil
+	lsp-enable-file-watchers nil
+	flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck c/c++-gcc))
   :hook ((c-mode c++-mode objc-mode) .
-         (lambda () (require 'ccls) (lsp))))
+	 (lambda () (require 'ccls) (lsp))))
 
+;; (mapcar (lambda (mode)
+;;	  (define-key mode [(control ?t)] 'pop-tag-mark)
+;;	  (define-key mode [(control ?\])] 'lsp-find-definition)
+;;	  (define-key mode [(control ?r)] 'lsp-find-references))
+;;	(list lsp-mode-map))
+
+;; Set up before-save hooks to format buffer and add/delete imports.
+;; Make sure you don't have other gofmt/goimports hooks enabled.
+(defun lsp-go-install-save-hooks ()
+  (add-hook 'before-save-hook #'lsp-format-buffer t t)
+  (add-hook 'before-save-hook #'lsp-organize-imports t t))
+(add-hook 'go-mode-hook #'lsp-go-install-save-hooks)
 
 (require 'server)
+(setq server-use-tcp t)
 (if (not (server-running-p)) (server-start))
 
+;; Programming
+(setq c-default-style "linux")
+(delete-selection-mode +1)
+(global-display-fill-column-indicator-mode +1)
+(add-hook 'before-save-hook 'whitespace-cleanup)
+(add-hook 'find-file-hook 'vc-registered-readonly)
+
+;; Useful key bindings
+(global-set-key [f2] 'save-buffer)
+(global-set-key [f4] 'other-window)
+(global-set-key [f9] 'kill-this-buffer)
+(global-set-key [end] 'end-of-line)
+(global-set-key [backspace] '(lambda ()
+			       (interactive)
+			       (if (region-active-p)
+				   (delete-active-region)
+				 (c-hungry-backspace))))
+
+(provide 'init)
+;;; init ends here
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-safe-themes
-   (quote
-    ("84d2f9eeb3f82d619ca4bfffe5f157282f4779732f48a5ac1484d94d5ff5b279" default)))
+ '(fill-column 80)
  '(package-selected-packages
-   (quote
-    (yasnippet ccls company-lsp lsp-ui lsp-mode diminish helm-projectile helm flycheck company avy which-key use-package smartparens smart-mode-line-powerline-theme projectile magit expand-region doom-themes crux))))
+   '(flycheck go-mode yaml-mode crux lsp-mode lsp-ui ccls which-key use-package smartparens magit expand-region company company-lsp)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
