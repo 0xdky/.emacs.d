@@ -1,0 +1,7 @@
+-target
+aarch64-linux-gnu
+-isystem/usr/local/include
+-isystem/usr/local/opt/llvm/include
+-isystem/usr/local/opt/llvm/include/c++/v1
+-isystem/Library/Developer/CommandLineTools/usr/include
+-isystem/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include
