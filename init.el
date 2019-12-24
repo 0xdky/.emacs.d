@@ -145,6 +145,7 @@
 	 ("C-t" . pop-tag-mark)
 	 ("C-]" . lsp-find-definition)
 	 ("C-r" . lsp-find-references)
+	 ("M-." . lsp-ui-find-workspace-symbol)
 	 )
   :config
   (add-hook 'go-mode 'lsp-deferred))
