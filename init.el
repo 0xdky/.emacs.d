@@ -112,8 +112,7 @@
 	       (lambda (p) (not (string-match-p "^/Users/" p))))
   (recentf-mode +1)
   (recentf-load-list)
-  (global-set-key "\C-xc" 'recentf-clear)
-  (global-set-key "\C-xo" 'recentf-open-files))
+  (global-set-key "\C-xc" 'recentf-clear))
 
 (use-package crux
   :preface
@@ -143,8 +142,8 @@
   :commands (lsp lsp-deferred)
   :bind (
 	 ("C-t" . pop-tag-mark)
-	 ("C-]" . lsp-find-definition)
-	 ("C-r" . lsp-find-references)
+	 ("C-]" . lsp-ui-peek-find-definitions)
+	 ("C-r" . lsp-ui-peek-find-references)
 	 ("M-." . lsp-ui-find-workspace-symbol)
 	 )
   :config
@@ -165,10 +164,14 @@
 (use-package ccls
   :ensure t
   :config
-  (setq ccls-executable "clangd"
+  (setq lsp-prefer-flymake nil
 	lsp-prefer-flymake nil
 	lsp-enable-snippet nil
 	lsp-enable-file-watchers nil
+	;; ccls-executable "clangd"
+	;; ccls-args '("--all-scopes-completion" "--background-index")
+	ccls-executable "ccls"
+	ccls-initialization-options '(:index (:comments 2) :completion (:detailedLabel t))
 	flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck c/c++-gcc))
   :hook ((c-mode c++-mode objc-mode) .
 	 (lambda () (require 'ccls) (lsp))))
