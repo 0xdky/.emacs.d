@@ -5,6 +5,18 @@
 
 ;;; Helper functions
 
+;; Setup disaply related at the top
+(menu-bar-mode -1)
+(if window-system
+    (progn
+      (tool-bar-mode -1)
+      (toggle-scroll-bar -1)
+      (global-display-fill-column-indicator-mode +1))
+  (progn
+    ;; (set-face-foreground 'minibuffer-prompt "cyan")
+    (set-face-foreground 'mode-line "black")
+    (set-face-background 'mode-line "cyan")))
+
 ;; Jump to matching paren
 (defun match-paren (arg)
   (interactive "p")
@@ -41,7 +53,8 @@
 (setq gc-cons-threshold 50000000)
 (setq large-file-warning-threshold 100000000)
 
-(setq initial-frame-alist '((width . 120) (height . 40)))
+(setq default-frame-alist '((width . 120) (height . 40)))
+(add-to-list 'default-frame-alist '(font . "Menlo 14"))
 (setq frame-title-format
       '((:eval (if (buffer-file-name)
 		   (abbreviate-file-name (buffer-file-name))
@@ -49,7 +62,6 @@
 (setq scroll-margin 0
       scroll-conservatively 100000
       scroll-preserve-screen-position 1)
-(set-frame-font "Monaco 13" nil t)
 
 (require 'package)
 (setq package-enable-at-startup nil)
@@ -64,9 +76,6 @@
 (eval-when-compile
   (require 'use-package))
 
-(menu-bar-mode -1)
-(toggle-scroll-bar -1)
-(tool-bar-mode -1)
 (blink-cursor-mode -1)
 (line-number-mode +1)
 (column-number-mode t)
@@ -133,9 +142,7 @@
 (use-package go-mode
   :ensure t
   :defer nil
-  :hook ((go-mode . lsp-deferred)
-	 (before-save . lsp-format-buffer)
-	 (before-save . lsp-organize-imports)))
+  :hook ((go-mode . lsp-deferred)))
 
 (use-package lsp-mode
   :ensure t
@@ -143,8 +150,8 @@
   :bind (
 	 ("C-t" . pop-tag-mark)
 	 ("C-]" . lsp-ui-peek-find-definitions)
-	 ("C-r" . lsp-ui-peek-find-references)
-	 ("M-." . lsp-ui-find-workspace-symbol)
+	 ("C-x r" . lsp-ui-peek-find-references)
+	 ("C-x ." . lsp-ui-find-workspace-symbol)
 	 )
   :config
   (add-hook 'go-mode 'lsp-deferred))
@@ -164,13 +171,11 @@
 (use-package ccls
   :ensure t
   :config
-  (setq lsp-prefer-flymake nil
-	lsp-prefer-flymake nil
-	lsp-enable-snippet nil
+  (setq lsp-enable-snippet nil
 	lsp-enable-file-watchers nil
-	;; ccls-executable "clangd"
-	;; ccls-args '("--all-scopes-completion" "--background-index")
-	ccls-executable "ccls"
+	ccls-executable "clangd"
+	ccls-args (if (string= ccls-executable "clangd")
+		      '("--all-scopes-completion" "--background-index") nil)
 	ccls-initialization-options '(:index (:comments 2) :completion (:detailedLabel t))
 	flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck c/c++-gcc))
   :hook ((c-mode c++-mode objc-mode) .
@@ -189,7 +194,7 @@
 	     '("gnu"
 	       (c-basic-offset . 4)	; Guessed value
 	       (c-offsets-alist
-		(access-label . 0)	; Guessed value
+		(access-label . -1000)	; Guessed value
 		(block-close . 0)	; Guessed value
 		(class-close . 0)	; Guessed value
 		(cpp-define-intro . +)	; Guessed value
@@ -202,78 +207,17 @@
 		(statement-block-intro . +) ; Guessed value
 		(stream-op . 5)		; Guessed value
 		(topmost-intro . 0)	; Guessed value
-		(annotation-top-cont . 0)
-		(annotation-var-cont . +)
-		(arglist-close . c-lineup-close-paren)
-		(arglist-cont c-lineup-gcc-asm-reg 0)
-		(arglist-cont-nonempty . c-lineup-arglist)
-		(arglist-intro . c-lineup-arglist-intro-after-paren)
-		(block-open . 0)
-		(brace-entry-open . 0)
-		(brace-list-close . 0)
-		(brace-list-entry . 0)
-		(brace-list-intro first c-lineup-2nd-brace-entry-in-arglist c-lineup-class-decl-init-+ +)
-		(brace-list-open . +)
-		(c . c-lineup-C-comments)
-		(case-label . 0)
-		(catch-clause . 0)
-		(class-open . 0)
-		(comment-intro . c-lineup-comment)
-		(composition-close . 0)
-		(composition-open . 0)
-		(cpp-macro . -1000)
-		(cpp-macro-cont . +)
-		(defun-open . 0)
-		(do-while-closure . 0)
-		(else-clause . 0)
-		(extern-lang-close . 0)
-		(extern-lang-open . 0)
-		(friend . 0)
-		(func-decl-cont . +)
-		(incomposition . +)
-		(inexpr-class . +)
-		(inexpr-statement . +)
-		(inextern-lang . +)
-		(inher-cont . c-lineup-multi-inher)
-		(inher-intro . +)
-		(inlambda . 0)
-		(inline-open . 0)
-		(inmodule . +)
-		(innamespace . +)
-		(knr-argdecl . 0)
-		(knr-argdecl-intro . 5)
-		(label . 0)
-		(lambda-intro-cont . +)
-		(member-init-cont . c-lineup-multi-inher)
-		(module-close . 0)
-		(module-open . 0)
-		(namespace-close . 0)
-		(namespace-open . 0)
-		(objc-method-args-cont . c-lineup-ObjC-method-args)
-		(objc-method-call-cont c-lineup-ObjC-method-call-colons c-lineup-ObjC-method-call +)
-		(objc-method-intro .
-				   [0])
-		(statement-case-intro . +)
-		(statement-case-open . +)
-		(statement-cont . +)
-		(string . -1000)
-		(substatement . +)
-		(substatement-label . 0)
-		(substatement-open . +)
-		(template-args-cont c-lineup-template-args +)
-		(topmost-intro-cont first c-lineup-topmost-intro-cont c-lineup-gnu-DEFUN-intro-cont))))
+		(cpp-macro . -1000))))
 
 (delete-selection-mode +1)
-(global-display-fill-column-indicator-mode +1)
 
 ;; Hooks
 (add-hook 'lsp-mode-hook 'which-func-mode)
-(add-hook 'before-save-hook 'whitespace-cleanup)
 (add-hook 'find-file-hook 'vc-registered-readonly)
 (add-hook 'c-mode-common-hook (lambda ()
 				(define-key c-mode-base-map "\C-q" 'comment-region)
-				(define-key c-mode-base-map "\C-uq" 'uncomment-region)
-				(c-set-style "dky")))
+				(define-key c-mode-base-map "\C-uq" 'uncomment-region)))
+(add-hook 'c++-mode-hook (lambda () (c-set-style "dky")))
 
 ;; Useful key bindings
 (global-set-key [f2] 'save-buffer)
@@ -285,6 +229,7 @@
 			       (if (region-active-p)
 				   (delete-active-region)
 				 (c-hungry-backspace))))
+(global-set-key [(meta ?g)] 'goto-line)
 
 (provide 'init)
 ;;; init ends here
@@ -294,8 +239,10 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(fill-column 80)
+ '(lsp-prefer-flymake nil)
  '(package-selected-packages
-   '(flycheck go-mode yaml-mode crux lsp-mode lsp-ui ccls which-key use-package smartparens magit expand-region company company-lsp)))
+   (quote
+    (go-mode yaml-mode crux lsp-mode lsp-ui ccls which-key use-package smartparens magit expand-region company company-lsp))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
