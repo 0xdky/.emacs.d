@@ -3,8 +3,6 @@
 ;;; Commentary:
 ;;; Simple Emacs setup for C/C++ development using language server
 
-;;; Helper functions
-
 ;; Setup disaply related at the top
 (menu-bar-mode -1)
 (if window-system
@@ -84,8 +82,11 @@
 (setq inhibit-startup-screen t)
 
 ;; Backup and refresh on changes
-(add-to-list 'backup-directory-alist
-	     `("*" . (concat *home "/.backup")))
+(setq version-control t
+      backup-by-copying t
+      delete-old-versions t
+      vc-make-backup-files t)
+(add-to-list 'backup-directory-alist `("." . ,(concat *home "/.backup")))
 (global-auto-revert-mode t)
 
 (use-package cc-mode
