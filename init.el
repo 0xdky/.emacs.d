@@ -183,7 +183,10 @@
 	 (lambda () (require 'ccls) (lsp))))
 
 (require 'server)
-(setq server-use-tcp t)
+(setq server-use-tcp t
+      server-name "emacs.server"
+      server-auth-dir (let ((dir (getenv "EPHEMERAL")))
+			(if dir (concat dir "/server") server-auth-dir)))
 (if (not (server-running-p)) (server-start))
 
 ;; Programming
@@ -213,9 +216,25 @@
 (delete-selection-mode +1)
 
 ;; Hooks
-(add-hook 'lsp-mode-hook 'which-func-mode)
+(add-hook 'lsp-mode-hook 'which-function-mode)
 (add-hook 'find-file-hook 'vc-registered-readonly)
 (add-hook 'c-mode-common-hook (lambda ()
+				;; Show current function in middle of modeline
+				(setq mode-line-format
+				      '("-"
+					mode-line-mule-info
+					mode-line-modified
+					mode-line-frame-identification
+					mode-line-buffer-identification
+					"   "
+					mode-line-position
+					(vc-mode vc-mode)
+					"   "
+					(which-function-mode ("" which-func-format "--"))
+					mode-line-modes
+					(global-mode-string ("--" global-mode-string))
+					"-%-"))
+				(c-toggle-hungry-state +1)
 				(define-key c-mode-base-map "\C-q" 'comment-region)
 				(define-key c-mode-base-map "\C-uq" 'uncomment-region)))
 (add-hook 'c++-mode-hook (lambda () (c-set-style "dky")))
@@ -225,11 +244,6 @@
 (global-set-key [f4] 'other-window)
 (global-set-key [f9] 'kill-this-buffer)
 (global-set-key [end] 'end-of-line)
-(global-set-key [backspace] '(lambda ()
-			       (interactive)
-			       (if (region-active-p)
-				   (delete-active-region)
-				 (c-hungry-backspace))))
 (global-set-key [(meta ?g)] 'goto-line)
 
 (provide 'init)
