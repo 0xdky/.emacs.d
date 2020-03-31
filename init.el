@@ -1,5 +1,5 @@
 ;;; package --- Minimal Emacs init file
-
+;;; Time-stamp: <2020-03-31 15:21:18 dhruva>
 ;;; Commentary:
 ;;; Simple Emacs setup for C/C++ development using language server
 
@@ -9,11 +9,7 @@
     (progn
       (tool-bar-mode -1)
       (toggle-scroll-bar -1)
-      (global-display-fill-column-indicator-mode +1))
-  (progn
-    ;; (set-face-foreground 'minibuffer-prompt "cyan")
-    (set-face-foreground 'mode-line "black")
-    (set-face-background 'mode-line "cyan")))
+      (global-display-fill-column-indicator-mode +1)))
 
 ;; Jump to matching paren
 (defun match-paren (arg)
@@ -89,6 +85,9 @@
 (add-to-list 'backup-directory-alist `("." . ,(concat *home "/.backup")))
 (global-auto-revert-mode t)
 
+;; Simple, light and elegant
+(load-theme 'tango)
+
 (use-package cc-mode
   :ensure t
   :hook ((c-mode c++-mode) . (lambda () (show-paren-mode t)))
@@ -138,12 +137,17 @@
 (use-package cc-mode
   :ensure t
   :config
-  (setq-default indent-tabs-mode t))
+  (setq-default indent-tabs-mode nil))
 
 (use-package go-mode
   :ensure t
   :defer nil
   :hook ((go-mode . lsp-deferred)))
+
+(use-package python-mode
+  :ensure t
+  :defer nil
+  :hook ((python-mode . lsp-deferred)))
 
 (use-package lsp-mode
   :ensure t
@@ -155,7 +159,9 @@
 	 ("C-x ." . lsp-ui-find-workspace-symbol)
 	 )
   :config
-  (add-hook 'go-mode 'lsp-deferred))
+  (setq lsp-prefer-flymake nil)
+  (add-hook 'go-mode 'lsp-deferred)
+  (add-hook 'python-mode 'lsp-deferred))
 
 (use-package lsp-ui
   :commands lsp-ui-mode
@@ -174,7 +180,7 @@
   :config
   (setq lsp-enable-snippet nil
 	lsp-enable-file-watchers nil
-	ccls-executable "clangd"
+	ccls-executable (if (executable-find "ccls") "ccls" "clangd")
 	ccls-args (if (string= ccls-executable "clangd")
 		      '("--all-scopes-completion" "--background-index") nil)
 	ccls-initialization-options '(:index (:comments 2) :completion (:detailedLabel t))
@@ -195,25 +201,85 @@
 ;; clang-format -style="{BasedOnStyle: llvm, IndentWidth: 4, AccessModifierOffset: -4}" -dump-config
 ;;-----------------------------------------------------------------------------
 (c-add-style "dky"
-	     '("gnu"
+	     '("cc-mode"
 	       (c-basic-offset . 4)	; Guessed value
 	       (c-offsets-alist
-		(access-label . -1000)	; Guessed value
+		(access-label . 0)	; Guessed value
 		(block-close . 0)	; Guessed value
 		(class-close . 0)	; Guessed value
-		(cpp-define-intro . +)	; Guessed value
 		(defun-block-intro . +)	; Guessed value
-		(defun-close . 0)	; Guessed value
+		(defun-close . 0)	    ; Guessed value
 		(inclass . +)		; Guessed value
-		(inline-close . 0)	; Guessed value
-		(member-init-intro . +)	; Guessed value
 		(statement . 0)		; Guessed value
 		(statement-block-intro . +) ; Guessed value
-		(stream-op . 5)		; Guessed value
-		(topmost-intro . 0)	; Guessed value
-		(cpp-macro . -1000))))
+		(statement-cont . +)	    ; Guessed value
+		(topmost-intro . 0)	    ; Guessed value
+		(annotation-top-cont . 0)
+		(annotation-var-cont . +)
+		(arglist-close . c-lineup-close-paren)
+		(arglist-cont c-lineup-gcc-asm-reg 0)
+		(arglist-cont-nonempty . c-lineup-arglist)
+		(arglist-intro . +)
+		(block-open . 0)
+		(brace-entry-open . 0)
+		(brace-list-close . 0)
+		(brace-list-entry . 0)
+		(brace-list-intro . +)
+		(brace-list-open . 0)
+		(c . c-lineup-C-comments)
+		(case-label . 0)
+		(catch-clause . 0)
+		(class-open . 0)
+		(comment-intro . c-lineup-comment)
+		(composition-close . 0)
+		(composition-open . 0)
+		(cpp-define-intro c-lineup-cpp-define +)
+		(cpp-macro . -1000)
+		(cpp-macro-cont . +)
+		(defun-open . 0)
+		(do-while-closure . 0)
+		(else-clause . 0)
+		(extern-lang-close . 0)
+		(extern-lang-open . 0)
+		(friend . 0)
+		(func-decl-cont . +)
+		(incomposition . +)
+		(inexpr-class . +)
+		(inexpr-statement . +)
+		(inextern-lang . +)
+		(inher-cont . c-lineup-multi-inher)
+		(inher-intro . +)
+		(inlambda . 0)
+		(inline-close . 0)
+		(inline-open . +)
+		(inmodule . +)
+		(innamespace . +)
+		(knr-argdecl . 0)
+		(knr-argdecl-intro . +)
+		(label . 2)
+		(lambda-intro-cont . +)
+		(member-init-cont . c-lineup-multi-inher)
+		(member-init-intro . +)
+		(module-close . 0)
+		(module-open . 0)
+		(namespace-close . 0)
+		(namespace-open . 0)
+		(objc-method-args-cont . c-lineup-ObjC-method-args)
+		(objc-method-call-cont c-lineup-ObjC-method-call-colons c-lineup-ObjC-method-call +)
+		(objc-method-intro .
+				   [0])
+		(statement-case-intro . +)
+		(statement-case-open . 0)
+		(stream-op . c-lineup-streamop)
+		(string . -1000)
+		(substatement . +)
+		(substatement-label . 2)
+		(substatement-open . +)
+		(template-args-cont c-lineup-template-args +)
+		(topmost-intro-cont . c-lineup-topmost-intro-cont))))
 
 (delete-selection-mode +1)
+(setq time-stamp-format "%Y-%02m-%02d %02H:%02M:%02S dhruva")
 
 ;; Hooks
 (add-hook 'lsp-mode-hook 'which-function-mode)
@@ -234,10 +300,12 @@
 					mode-line-modes
 					(global-mode-string ("--" global-mode-string))
 					"-%-"))
+				(c-set-style "dky")
+				(add-hook 'before-save-hook 'whitespace-cleanup)
 				(c-toggle-hungry-state +1)
 				(define-key c-mode-base-map "\C-q" 'comment-region)
 				(define-key c-mode-base-map "\C-uq" 'uncomment-region)))
-(add-hook 'c++-mode-hook (lambda () (c-set-style "dky")))
+(add-hook 'before-save-hook 'time-stamp)
 
 ;; Useful key bindings
 (global-set-key [f2] 'save-buffer)
@@ -254,10 +322,10 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(fill-column 80)
- '(lsp-prefer-flymake nil)
+ '(lsp-diagnostic-package :none)
+ '(lsp-prefer-flymake nil t)
  '(package-selected-packages
-   (quote
-    (go-mode yaml-mode crux lsp-mode lsp-ui ccls which-key use-package smartparens magit expand-region company company-lsp))))
+   '(python-mode go-mode yaml-mode crux lsp-mode lsp-ui ccls which-key use-package smartparens magit expand-region company company-lsp)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
