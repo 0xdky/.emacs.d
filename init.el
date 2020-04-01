@@ -1,5 +1,5 @@
 ;;; package --- Minimal Emacs init file
-;;; Time-stamp: <2020-03-31 15:21:18 dhruva>
+;;; Time-stamp: <2020-03-31 17:29:57 dhruva>
 ;;; Commentary:
 ;;; Simple Emacs setup for C/C++ development using language server
 
@@ -87,6 +87,11 @@
 
 ;; Simple, light and elegant
 (load-theme 'tango)
+
+(use-package pbcopy
+  :ensure t
+  :config
+  (turn-on-pbcopy))
 
 (use-package cc-mode
   :ensure t
@@ -325,7 +330,7 @@
  '(lsp-diagnostic-package :none)
  '(lsp-prefer-flymake nil t)
  '(package-selected-packages
-   '(python-mode go-mode yaml-mode crux lsp-mode lsp-ui ccls which-key use-package smartparens magit expand-region company company-lsp)))
+   '(pbcopy python-mode go-mode yaml-mode crux lsp-mode lsp-ui ccls which-key use-package smartparens magit expand-region company company-lsp)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
