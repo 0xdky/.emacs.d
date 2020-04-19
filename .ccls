@@ -3,5 +3,8 @@ aarch64-linux-gnu
 -isystem/usr/local/include
 -isystem/usr/local/opt/llvm/include
 -isystem/usr/local/opt/llvm/include/c++/v1
+-isystem/usr/local/opt/llvm/lib/clang/10.0.0/include
 -isystem/Library/Developer/CommandLineTools/usr/include
+-isystem/Library/Developer/CommandLineTools/usr/include/c++/v1
 -isystem/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include
+-isystem/usr/local/Cellar/python@2/2.7.17_1/Frameworks/Python.framework/Versions/2.7/include/python2.7
