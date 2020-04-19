@@ -1,5 +1,5 @@
 ;;; package --- Minimal Emacs init file
-;;; Time-stamp: <2020-03-31 17:29:57 dhruva>
+;;; Time-stamp: <2020-04-19 08:42:34 dhruva>
 ;;; Commentary:
 ;;; Simple Emacs setup for C/C++ development using language server
 
@@ -107,10 +107,6 @@
   :diminish which-key-mode
   :config
   (which-key-mode +1))
-
-(use-package magit
-  :ensure t
-  :bind (("C-M-g" . magit-status)))
 
 (use-package company
   :ensure t
@@ -330,7 +326,7 @@
  '(lsp-diagnostic-package :none)
  '(lsp-prefer-flymake nil t)
  '(package-selected-packages
-   '(pbcopy python-mode go-mode yaml-mode crux lsp-mode lsp-ui ccls which-key use-package smartparens magit expand-region company company-lsp)))
+   '(pbcopy python-mode go-mode yaml-mode crux lsp-mode lsp-ui ccls which-key use-package smartparens expand-region company company-lsp)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
