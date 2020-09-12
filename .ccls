@@ -1,5 +1,6 @@
--target
-aarch64-linux-gnu
+-DNO_MMAP
+-target aarch64-linux-gnu
+-isystem.
 -isystem/usr/local/include
 -isystem/usr/local/opt/llvm/include
 -isystem/usr/local/opt/llvm/include/c++/v1

@@ -1,5 +1,5 @@
 ;;; package --- Minimal Emacs init file
-;;; Time-stamp: <2020-04-19 08:42:34 dhruva>
+;;; Time-stamp: <2020-09-12 10:32:11 dhruva>
 ;;; Commentary:
 ;;; Simple Emacs setup for C/C++ development using language server
 
@@ -59,8 +59,13 @@
 
 (require 'package)
 (setq package-enable-at-startup nil)
-(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
-(add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/"))
+(require 'package)
+(add-to-list 'package-archives
+	     '("gnu" . "http://elpa.gnu.org/packages/"))
+(add-to-list 'package-archives
+	     '("melpa" . "https://melpa.org/packages/"))
+;; (add-to-list 'package-archives
+;; 	     '("melpa-stable" . "https://stable.melpa.org/packages/"))
 (package-initialize)
 
 (unless (package-installed-p 'use-package)
@@ -85,8 +90,10 @@
 (add-to-list 'backup-directory-alist `("." . ,(concat *home "/.backup")))
 (global-auto-revert-mode t)
 
-;; Simple, light and elegant
-(load-theme 'tango)
+(use-package solarized-theme
+  :ensure t
+  :config
+  (load-theme 'solarized-dark t t))
 
 (use-package pbcopy
   :ensure t
@@ -107,12 +114,6 @@
   :diminish which-key-mode
   :config
   (which-key-mode +1))
-
-(use-package company
-  :ensure t
-  :diminish company-mode
-  :config
-  (add-hook 'after-init-hook #'global-company-mode))
 
 (use-package recentf
   :ensure t
@@ -135,20 +136,15 @@
   ("C-a" . crux-move-beginning-of-line)
   ([home] . crux-move-beginning-of-line))
 
-(use-package cc-mode
-  :ensure t
-  :config
-  (setq-default indent-tabs-mode nil))
-
 (use-package go-mode
   :ensure t
   :defer nil
   :hook ((go-mode . lsp-deferred)))
 
-(use-package python-mode
-  :ensure t
-  :defer nil
-  :hook ((python-mode . lsp-deferred)))
+;; (use-package python-mode
+;;   :ensure t
+;;   :defer nil
+;;   :hook ((python-mode . lsp-deferred)))
 
 (use-package lsp-mode
   :ensure t
@@ -160,9 +156,8 @@
 	 ("C-x ." . lsp-ui-find-workspace-symbol)
 	 )
   :config
-  (setq lsp-prefer-flymake nil)
-  (add-hook 'go-mode 'lsp-deferred)
-  (add-hook 'python-mode 'lsp-deferred))
+  ;; (add-hook 'go-mode 'lsp-deferred)
+  (setq lsp-prefer-flymake nil))
 
 (use-package lsp-ui
   :commands lsp-ui-mode
@@ -170,11 +165,6 @@
   (setq lsp-ui-doc-enable nil
 	lsp-ui-sideline-enable nil)
   :ensure t)
-
-(use-package company-lsp
-  :ensure t
-  :commands company-lsp
-  :config (push 'company-lsp company-backends))
 
 (use-package ccls
   :ensure t
@@ -206,78 +196,9 @@
 	       (c-basic-offset . 4)	; Guessed value
 	       (c-offsets-alist
 		(access-label . 0)	; Guessed value
-		(block-close . 0)	; Guessed value
-		(class-close . 0)	; Guessed value
-		(defun-block-intro . +)	; Guessed value
-		(defun-close . 0)	    ; Guessed value
-		(inclass . +)		; Guessed value
-		(statement . 0)		; Guessed value
-		(statement-block-intro . +) ; Guessed value
-		(statement-cont . +)	    ; Guessed value
-		(topmost-intro . 0)	    ; Guessed value
-		(annotation-top-cont . 0)
-		(annotation-var-cont . +)
 		(arglist-close . c-lineup-close-paren)
 		(arglist-cont c-lineup-gcc-asm-reg 0)
-		(arglist-cont-nonempty . c-lineup-arglist)
-		(arglist-intro . +)
-		(block-open . 0)
-		(brace-entry-open . 0)
-		(brace-list-close . 0)
-		(brace-list-entry . 0)
-		(brace-list-intro . +)
-		(brace-list-open . 0)
-		(c . c-lineup-C-comments)
-		(case-label . 0)
-		(catch-clause . 0)
-		(class-open . 0)
-		(comment-intro . c-lineup-comment)
-		(composition-close . 0)
-		(composition-open . 0)
-		(cpp-define-intro c-lineup-cpp-define +)
-		(cpp-macro . -1000)
-		(cpp-macro-cont . +)
-		(defun-open . 0)
-		(do-while-closure . 0)
-		(else-clause . 0)
-		(extern-lang-close . 0)
-		(extern-lang-open . 0)
-		(friend . 0)
-		(func-decl-cont . +)
-		(incomposition . +)
-		(inexpr-class . +)
-		(inexpr-statement . +)
-		(inextern-lang . +)
-		(inher-cont . c-lineup-multi-inher)
-		(inher-intro . +)
-		(inlambda . 0)
-		(inline-close . 0)
-		(inline-open . +)
-		(inmodule . +)
-		(innamespace . +)
-		(knr-argdecl . 0)
-		(knr-argdecl-intro . +)
-		(label . 2)
-		(lambda-intro-cont . +)
-		(member-init-cont . c-lineup-multi-inher)
-		(member-init-intro . +)
-		(module-close . 0)
-		(module-open . 0)
-		(namespace-close . 0)
-		(namespace-open . 0)
-		(objc-method-args-cont . c-lineup-ObjC-method-args)
-		(objc-method-call-cont c-lineup-ObjC-method-call-colons c-lineup-ObjC-method-call +)
-		(objc-method-intro .
-				   [0])
-		(statement-case-intro . +)
-		(statement-case-open . 0)
-		(stream-op . c-lineup-streamop)
-		(string . -1000)
-		(substatement . +)
-		(substatement-label . 2)
-		(substatement-open . +)
-		(template-args-cont c-lineup-template-args +)
-		(topmost-intro-cont . c-lineup-topmost-intro-cont))))
+		(arglist-cont-nonempty . c-lineup-arglist))))
 
 (delete-selection-mode +1)
 (setq time-stamp-format "%Y-%02m-%02d %02H:%02M:%02S dhruva")
@@ -302,7 +223,7 @@
 					(global-mode-string ("--" global-mode-string))
 					"-%-"))
 				(c-set-style "dky")
-				(add-hook 'before-save-hook 'whitespace-cleanup)
+				;; (add-hook 'before-save-hook 'whitespace-cleanup)
 				(c-toggle-hungry-state +1)
 				(define-key c-mode-base-map "\C-q" 'comment-region)
 				(define-key c-mode-base-map "\C-uq" 'uncomment-region)))
@@ -314,6 +235,7 @@
 (global-set-key [f9] 'kill-this-buffer)
 (global-set-key [end] 'end-of-line)
 (global-set-key [(meta ?g)] 'goto-line)
+(global-set-key "\C-xq" 'read-only-mode)
 
 (provide 'init)
 ;;; init ends here
@@ -323,10 +245,10 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(fill-column 80)
- '(lsp-diagnostic-package :none)
+ '(lsp-diagnostics-provider :none)
  '(lsp-prefer-flymake nil t)
  '(package-selected-packages
-   '(pbcopy python-mode go-mode yaml-mode crux lsp-mode lsp-ui ccls which-key use-package smartparens expand-region company company-lsp)))
+   '(solarized-theme counsel flycheck pbcopy python-mode go-mode yaml-mode crux lsp-mode lsp-ui ccls which-key use-package smartparens expand-region)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
